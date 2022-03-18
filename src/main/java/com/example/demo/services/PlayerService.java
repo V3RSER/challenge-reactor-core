@@ -9,6 +9,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Comparator;
+import java.util.Objects;
 
 public class PlayerService {
 
@@ -28,6 +29,7 @@ public class PlayerService {
                 .buffer(100)
                 .limitRate(100)
                 .flatMap(player -> Flux.fromStream(player.parallelStream()))
+                .filter(player -> !Objects.isNull(player.getClub()))
                 .filter(player -> player.getClub().equals(club));
     }
 

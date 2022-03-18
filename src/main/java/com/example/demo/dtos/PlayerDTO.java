@@ -91,4 +91,17 @@ public class PlayerDTO {
     public void setClub(String club) {
         this.club = club;
     }
+
+    @Override
+    public String toString() {
+        return "PlayerDTO{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", age=" + age +
+                ", nationality='" + nationality + '\'' +
+                ", winners=" + winners +
+                ", games=" + games +
+                ", club='" + club + '\'' +
+                '}';
+    }
 }

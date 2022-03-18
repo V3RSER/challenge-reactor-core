@@ -8,9 +8,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 public class CSVUtilTest {
 
@@ -21,42 +20,33 @@ public class CSVUtilTest {
     }
 
     @Test
-    void stream_filtrarJugadoresMayoresA35() {
-        List<PlayerDTO> list = CsvUtilFile.getPlayers();
-        Map<String, List<PlayerDTO>> listFilter = list.parallelStream()
-                .filter(player -> player.age >= 35)
-                .map(player -> {
-                    player.name = player.name.toUpperCase(Locale.ROOT);
-                    return player;
-                })
-                .flatMap(playerA -> list.parallelStream()
-                        .filter(playerB -> playerA.club.equals(playerB.club))
-                )
-                .distinct()
-                .collect(Collectors.groupingBy(PlayerDTO::getClub));
-
-        assert listFilter.size() == 322;
-    }
-
-
-    @Test
-    void reactive_filtrarJugadoresMayoresA35() {
+    void stream_filterPlayersByOlderAge() {
+        var age = 34;
         List<PlayerDTO> list = CsvUtilFile.getPlayers();
         Flux<PlayerDTO> listFlux = Flux.fromStream(list.parallelStream()).cache();
         Mono<Map<String, Collection<PlayerDTO>>> listFilter = listFlux
-                .filter(player -> player.age >= 35)
-                .map(player -> {
-                    player.name = player.name.toUpperCase(Locale.ROOT);
-                    return player;
-                })
-                .buffer(100)
-                .flatMap(playerA -> listFlux
-                        .filter(playerB -> playerA.stream()
-                                .anyMatch(a -> a.club.equals(playerB.club)))
-                )
+                .filter(playerDTO -> playerDTO.age > age)
                 .distinct()
-                .collectMultimap(PlayerDTO::getClub);
+                .collectMultimap(PlayerDTO::getName);
 
-        assert listFilter.block().size() == 322;
+        listFilter.subscribe(players -> System.out.println("Jugadores con edad > " + age + ": " + players.size()));
+        listFilter.block().forEach((name, playerDTOS) -> playerDTOS.forEach(System.out::println));
+        assert listFilter.block().size() == 488;
+    }
+
+    @Test
+    void stream_filterPlayersByClub() {
+        var club = "Manchester City";
+        List<PlayerDTO> list = CsvUtilFile.getPlayers();
+        Flux<PlayerDTO> listFlux = Flux.fromStream(list.parallelStream()).cache();
+        Mono<Map<String, Collection<PlayerDTO>>> listFilter = listFlux
+                .filter(player -> !Objects.isNull(player.club))
+                .filter(playerDTO -> playerDTO.getClub().equals(club))
+                .distinct()
+                .collectMultimap(PlayerDTO::getName);
+
+        listFilter.subscribe(players -> System.out.println("Jugadores del club " + club + ": " + players.size()));
+        listFilter.block().forEach((name, playerDTOS) -> playerDTOS.forEach(System.out::println));
+        assert listFilter.block().size() == 33;
     }
 }
