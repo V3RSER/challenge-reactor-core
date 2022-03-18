@@ -1,32 +1,29 @@
 package com.example.demo;
 
-import com.opencsv.CSVReader;
-import com.opencsv.exceptions.CsvException;
+import com.example.demo.dtos.PlayerDTO;
+import com.example.demo.utils.CsvUtilFile;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class CSVUtilTest {
 
     @Test
-    void converterData(){
-        List<Player> list = CsvUtilFile.getPlayers();
+    void converterData() {
+        List<PlayerDTO> list = CsvUtilFile.getPlayers();
         assert list.size() == 18207;
     }
 
     @Test
-    void stream_filtrarJugadoresMayoresA35(){
-        List<Player> list = CsvUtilFile.getPlayers();
-        Map<String, List<Player>> listFilter = list.parallelStream()
+    void stream_filtrarJugadoresMayoresA35() {
+        List<PlayerDTO> list = CsvUtilFile.getPlayers();
+        Map<String, List<PlayerDTO>> listFilter = list.parallelStream()
                 .filter(player -> player.age >= 35)
                 .map(player -> {
                     player.name = player.name.toUpperCase(Locale.ROOT);
@@ -36,17 +33,17 @@ public class CSVUtilTest {
                         .filter(playerB -> playerA.club.equals(playerB.club))
                 )
                 .distinct()
-                .collect(Collectors.groupingBy(Player::getClub));
+                .collect(Collectors.groupingBy(PlayerDTO::getClub));
 
         assert listFilter.size() == 322;
     }
 
 
     @Test
-    void reactive_filtrarJugadoresMayoresA35(){
-        List<Player> list = CsvUtilFile.getPlayers();
-        Flux<Player> listFlux = Flux.fromStream(list.parallelStream()).cache();
-        Mono<Map<String, Collection<Player>>> listFilter = listFlux
+    void reactive_filtrarJugadoresMayoresA35() {
+        List<PlayerDTO> list = CsvUtilFile.getPlayers();
+        Flux<PlayerDTO> listFlux = Flux.fromStream(list.parallelStream()).cache();
+        Mono<Map<String, Collection<PlayerDTO>>> listFilter = listFlux
                 .filter(player -> player.age >= 35)
                 .map(player -> {
                     player.name = player.name.toUpperCase(Locale.ROOT);
@@ -54,15 +51,12 @@ public class CSVUtilTest {
                 })
                 .buffer(100)
                 .flatMap(playerA -> listFlux
-                         .filter(playerB -> playerA.stream()
-                                 .anyMatch(a ->  a.club.equals(playerB.club)))
+                        .filter(playerB -> playerA.stream()
+                                .anyMatch(a -> a.club.equals(playerB.club)))
                 )
                 .distinct()
-                .collectMultimap(Player::getClub);
+                .collectMultimap(PlayerDTO::getClub);
 
         assert listFilter.block().size() == 322;
     }
-
-
-
 }

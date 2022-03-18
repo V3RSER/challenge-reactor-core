@@ -1,35 +1,38 @@
-package com.example.demo;
+package com.example.demo.dtos;
 
-public class Player {
-    public int id;
+import lombok.Data;
+
+@Data
+public class PlayerDTO {
+    public Integer id;
     public String name;
     public int age;
     public String icon;
-    public String national;
+    public String nationality;
     public int winners;
     public int games;
     public String club;
 
-    public Player(){
-
+    public PlayerDTO() {
     }
 
-    public Player(int id, String name, int age, String icon, String national, int winners, int games, String club) {
+    public PlayerDTO(
+            Integer id, String name, int age, String icon, String nationality, int winners, int games, String club) {
         this.id = id;
         this.name = name;
         this.age = age;
         this.icon = icon;
-        this.national = national;
+        this.nationality = nationality;
         this.winners = winners;
         this.games = games;
         this.club = club;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -57,12 +60,12 @@ public class Player {
         this.icon = icon;
     }
 
-    public String getNational() {
-        return national;
+    public String getNationality() {
+        return nationality;
     }
 
-    public void setNational(String national) {
-        this.national = national;
+    public void setNationality(String nationality) {
+        this.nationality = nationality;
     }
 
     public int getWinners() {

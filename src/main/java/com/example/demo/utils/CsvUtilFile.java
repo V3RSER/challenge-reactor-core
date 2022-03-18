@@ -1,5 +1,6 @@
-package com.example.demo;
+package com.example.demo.utils;
 
+import com.example.demo.dtos.PlayerDTO;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 
@@ -10,14 +11,15 @@ import java.util.List;
 import java.util.Optional;
 
 public class CsvUtilFile {
-    private CsvUtilFile(){}
+    private CsvUtilFile() {
+    }
 
-    public static List<Player> getPlayers(){
-        var uri =  CsvUtilFile.class.getClassLoader().getResource("data.csv");
-        List<Player> list = new ArrayList<>();
+    public static List<PlayerDTO> getPlayers() {
+        var uri = CsvUtilFile.class.getClassLoader().getResource("data.csv");
+        List<PlayerDTO> list = new ArrayList<>();
         try (CSVReader reader = new CSVReader(new FileReader(uri.getFile()))) {
             List<String[]> registers = reader.readAll();
-            registers.forEach(strings -> list.add(new Player(
+            registers.forEach(strings -> list.add(new PlayerDTO(
                     Integer.parseInt(strings[0].trim()),
                     strings[1],
                     Integer.parseInt(Optional.of(strings[2].trim()).filter(h -> !h.isBlank()).orElse("0")),
@@ -28,7 +30,7 @@ public class CsvUtilFile {
                     strings[7]
             )));
 
-           return list;
+            return list;
 
         } catch (IOException | CsvException e) {
             throw new IllegalArgumentException(e.getMessage());
